@@ -9,6 +9,8 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+app.use(express.urlencoded({ extended: true }));
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -18,9 +20,11 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 })
 
-app.get("/urls/:id", (req, res) => {
-  
-  console.log(req.params.id)
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
+});
+
+app.get("/urls/:id", (req, res) => { 
 const shortUrl = req.params.id
   const templateVars = { id: shortUrl, longURL: urlDatabase[shortUrl] };
   res.render("urls_show", templateVars);
