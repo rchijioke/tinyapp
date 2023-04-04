@@ -59,6 +59,14 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortUrl}`);
 });
 
+app.post('/urls/:id/delete', (req, res) => {
+  const id = req.params.id;
+  // the delete operator will remove the URL
+  delete urlDatabase[id];
+  // then redirect the client back to the urls_index page
+  res.redirect('/urls');
+});
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
