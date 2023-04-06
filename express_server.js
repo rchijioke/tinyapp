@@ -3,8 +3,10 @@ const app = express();
 const PORT = 8080; // default port 8080
 const router = express.Router()
 
+
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
+
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -68,12 +70,20 @@ app.post('/urls/:id/delete', (req, res) => {
   res.redirect('/urls');
 });
 
+app.post("/login", (req, res) => {
+  const username = req.body.username;
+  res.cookie("username", username); 
+  res.redirect("/urls"); 
+});
+
 router.post('/urls/:id', (req, res) => {
   const  id  = req.params; // Get the ID from the route parameter
   const  longURL  = req.body; // Get the new long URL from the request body
   // Redirect the client back to /urls
   res.redirect('/urls');
 });
+
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
