@@ -1,22 +1,21 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
-const router = express.Router()
-var cookieParser = require('cookie-parser')
-
+const router = express.Router();
+var cookieParser = require("cookie-parser");
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser())
+app.use(cookieParser());
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b2xVn2: "http://www.lighthouselabs.ca",
+  "9sm5xK": "http://www.google.com",
 };
 
 function generateRandomString() {
   //  const alphaNum = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  let result = '';
+  let result = "";
   for (let i = 0; i < 6; i++) {
     result += alphaNum[Math.floor(Math.random() * alphaNum.length)];
   }
@@ -30,7 +29,7 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {
   const templateVars = {
     username: req.cookies["username"],
-    urls: urlDatabase
+    urls: urlDatabase,
   };
   res.render("urls_index", templateVars);
 });
@@ -39,8 +38,8 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
-app.get("/urls/:id", (req, res) => { 
-const shortUrl = req.params.id
+app.get("/urls/:id", (req, res) => {
+  const shortUrl = req.params.id;
   const templateVars = { id: shortUrl, longURL: urlDatabase[shortUrl] };
   res.render("urls_show", templateVars);
 });
@@ -59,7 +58,6 @@ app.get("/u/:id", (req, res) => {
   res.redirect(longURL);
 });
 
-
 app.post("/urls", (req, res) => {
   const shortUrl = generateRandomString();
   const longUrl = req.body.longURL;
@@ -67,34 +65,36 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortUrl}`);
 });
 
-app.post('/urls/:id/delete', (req, res) => {
+app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
   // the delete operator will remove the URL
   delete urlDatabase[id];
   // then redirect the client back to the urls_index page
-  res.redirect('/urls');
+  res.redirect("/urls");
 });
 
 app.post("/login", (req, res) => {
   const username = req.body.username;
-  console.log(username)
-  res.cookie("username", username); 
- 
-  res.redirect("/urls"); 
+  console.log(username);
+  res.cookie("username", username);
+
+  res.redirect("/urls");
 });
 
-router.post('/urls/:id', (req, res) => {
-  const  id  = req.params; // Get the ID from the route parameter
-  const  longURL  = req.body; // Get the new long URL from the request body
+app.post("/logout", (req, res) => {
+  res.clearCookie("username");
+  res.redirect("/urls");
+});
+
+router.post("/urls/:id", (req, res) => {
+  const id = req.params; // Get the ID from the route parameter
+  const longURL = req.body; // Get the new long URL from the request body
   // Redirect the client back to /urls
-  res.redirect('/urls');
+  res.redirect("/urls");
 });
-
-
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
 module.exports = router;
-
