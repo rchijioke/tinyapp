@@ -14,7 +14,7 @@ const urlDatabase = {
 };
 
 function generateRandomString() {
-  //  const alphaNum = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+   const alphaNum = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let result = "";
   for (let i = 0; i < 6; i++) {
     result += alphaNum[Math.floor(Math.random() * alphaNum.length)];
@@ -58,6 +58,11 @@ app.get("/u/:id", (req, res) => {
   res.redirect(longURL);
 });
 
+app.get('/register', (req, res) => {
+  const templateVars = { username: req.cookies.username };
+  res.render('urls_register', templateVars);
+});
+
 app.post("/urls", (req, res) => {
   const shortUrl = generateRandomString();
   const longUrl = req.body.longURL;
@@ -67,9 +72,9 @@ app.post("/urls", (req, res) => {
 
 app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
-  // the delete operator will remove the URL
+
   delete urlDatabase[id];
-  // then redirect the client back to the urls_index page
+
   res.redirect("/urls");
 });
 
