@@ -45,6 +45,19 @@ const findUserByEmail = (email) => {
   return null;
 };
 
+const isLoggedIn = (userid) => {
+  const user = users[userid];
+  if (user) {
+    return true;
+  }
+  return false
+};
+
+//  to check if user is registered and logged in
+const userRegisteredAndLoggedIn = (req, res, next) => {
+  const registered = true; 
+  const loggedIn = true;
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -82,6 +95,9 @@ app.get("/hello", (req, res) => {
 app.get("/u/:id", (req, res) => {
   const shortURL = req.params.id;
   const longURL = urlDatabase[shortURL];
+  if (!longURL) {
+    return res.status(404).send('URL not found');
+  }
   res.redirect(longURL);
 });
 
@@ -90,8 +106,8 @@ app.get("/register", (req, res) => {
   //const user = users[req.cookies.user_id]
   // console.log("user", user)
   // const templateVars = { user };
-  if (req.cookies.user_id) {
-    console.log("here");
+  const userid = req.cookies.user_id
+  if (isLoggedIn(userid)) {
     res.redirect("/urls");
   } else {
     const templateVars = { user: undefined };
@@ -101,16 +117,28 @@ app.get("/register", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
+  const userid = req.cookies.user_id
+  if (isLoggedIn(userid)) {
+   return res.redirect("/urls")
+  }
   const templateVars = { user: undefined };
   res.render("urls_login", templateVars); // Render the login form template
 });
 
 app.get("/urls/new", (req, res) => {
   const user = req.user;
+  const userid = req.cookies.user_id
+  if(!isLoggedIn(userid)) {
+    return res.redirect("/login") 
+  }
   res.render("urls_new", user);
 });
 
 app.post("/urls", (req, res) => {
+  const userid = req.cookies.user_id
+  if(!isLoggedIn(userid)){
+    res.send("Please <a href='/login'> log in </a> to create URL")
+  }
   const shortUrl = generateRandomString();
   const longUrl = req.body.longURL;
   urlDatabase[shortUrl] = longUrl;
