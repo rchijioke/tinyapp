@@ -14,7 +14,8 @@ const urlDatabase = {
 };
 
 function generateRandomString() {
-   const alphaNum = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const alphaNum =
+    "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
   let result = "";
   for (let i = 0; i < 6; i++) {
     result += alphaNum[Math.floor(Math.random() * alphaNum.length)];
@@ -50,9 +51,9 @@ app.get("/", (req, res) => {
 
 app.get("/urls", (req, res) => {
   // const userId = req.cookies.user_id;
-  const userId = "userRandomID"
-  console.log("this is user Id", userId)
-  console.log(users[userId])
+  const userId = "userRandomID";
+  console.log("this is user Id", userId);
+  console.log(users[userId]);
   const templateVars = {
     user: users[userId],
     urls: urlDatabase,
@@ -61,7 +62,7 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  res.render("urls_new", { user: undefined });
 });
 
 app.get("/urls/:id", (req, res) => {
@@ -84,19 +85,29 @@ app.get("/u/:id", (req, res) => {
   res.redirect(longURL);
 });
 
-app.get('/register', (req, res) => {
+app.get("/register", (req, res) => {
   // const user = users["userRandomID"]
   //const user = users[req.cookies.user_id]
   // console.log("user", user)
   // const templateVars = { user };
-  if(req.cookies.user_id){
-    console.log("here")
-    res.redirect("/urls")}
-  else {
-    const templateVars = {user: undefined};
-    res.render('urls_register', templateVars);
-    console.log("here2")
+  if (req.cookies.user_id) {
+    console.log("here");
+    res.redirect("/urls");
+  } else {
+    const templateVars = { user: undefined };
+    res.render("urls_register", templateVars);
+    console.log("here2");
   }
+});
+
+app.get("/login", (req, res) => {
+  const templateVars = { user: undefined };
+  res.render("urls_login", templateVars); // Render the login form template
+});
+
+app.get("/urls/new", (req, res) => {
+  const user = req.user;
+  res.render("urls_new", user);
 });
 
 app.post("/urls", (req, res) => {
@@ -117,28 +128,35 @@ app.post("/urls/:id/delete", (req, res) => {
 app.post("/login", (req, res) => {
   // const user = req.body.user;
   // console.log(user);
-  // store email and password from body requestconst email = req.body.email
-  // const password = req.body.password; 
-  // for future reference const userObject = getUserByEmail(email , users); 
-  const user = users["userRandomID"]
-  res.cookie("user_id", user.id);
-  // const userId = req.cookies.user_id;
-  // const templateVars = {
-  //   user: users[userId],
-  //   urls: urlDatabase,
-  // };
-  
-  res.redirect("/urls");
+  // store email and password from body request
+  const email = req.body.email;
+  const password = req.body.password;
+  // for future reference
+  const user = findUserByEmail(email);
+  if (!user) {
+    res.status(403).send("User not Found");
+  } else if (user.password !== password) {
+    res.status(403).send("User not Found");
+  } else {
+    res.cookie("user_id", user.id);
+    // const userId = req.cookies.user_id;
+    // const templateVars = {
+    //   user: users[userId],
+    //   urls: urlDatabase,
+    // };
+
+    res.redirect("/urls");
+  }
 });
 
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
-  res.redirect("/urls");
+  res.redirect("/login");
 });
 
 app.post("/register", (req, res) => {
-  const userId = "userRandomID"
-  const {email, password } = req.body;
+  const { email, password } = req.body;
+
   if (!email || !password) {
     return res.status(400).send("Email and password required.");
   }
@@ -146,20 +164,21 @@ app.post("/register", (req, res) => {
   if (findUserByEmail(email)) {
     return res.status(400).send("Email is already in use.");
   }
+  const userId = generateRandomString();
   const newUser = {
     id: userId,
     email: email,
-    password: password
-  }
-  users[userId] = newUser
+    password: password,
+  };
+  users[userId] = newUser;
   res.cookie("user_id", userId);
-  res.redirect("/urls")
-})
+  res.redirect("/urls");
+});
 
 router.post("/urls/:id", (req, res) => {
-  const id = req.params; // Get the ID from the route parameter
-  const longURL = req.body; // Get the new long URL from the request body
-  // Redirect the client back to /urls
+  const id = req.params;
+  const longURL = req.body;
+
   res.redirect("/urls");
 });
 
