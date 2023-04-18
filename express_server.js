@@ -9,8 +9,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 const urlDatabase = {
-  b2xVn2: "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
 };
 
 function generateRandomString() {
@@ -53,25 +59,35 @@ const isLoggedIn = (userid) => {
   return false
 };
 
-//  to check if user is registered and logged in
-const userRegisteredAndLoggedIn = (req, res, next) => {
-  const registered = true; 
-  const loggedIn = true;
+function urlsForUser(id) {
+  const userUrls = {};
+  for (const shortURL in urlDatabase) {
+    if (urlDatabase[shortURL].userID === id) {
+      userUrls[shortURL] = urlDatabase[shortURL];
+    }
+  }
+  return userUrls;
+}
+
+
+
 
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
 app.get("/urls", (req, res) => {
-  // const userId = req.cookies.user_id;
-  const userId = "userRandomID";
-  console.log("this is user Id", userId);
-  console.log(users[userId]);
+  const userId = req.cookies.user_id;
+  if (!isLoggedIn(userId)) {
+    res.status(401).send("<html><body>Please <a href='/login'>log in</a> to view URLs.</body></html>");
+  } else {
+  const userUrls = urlsForUser(userId)
   const templateVars = {
     user: users[userId],
-    urls: urlDatabase,
+    urls: userUrls,
   };
   res.render("urls_index", templateVars);
+}
 });
 
 app.get("/urls/new", (req, res) => {
@@ -79,13 +95,22 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
+  const userId = req.cookies.user_id
   const shortUrl = req.params.id;
-  const templateVars = { id: shortUrl, longURL: urlDatabase[shortUrl] };
+  const url = urlDatabase[shortUrl];
+  if (!isLoggedIn(userId)) {
+    res.status(401).send("<html><body>Please <a href='/login'>log in</a> to view this URL.</body></html>");
+  } else if (!url || url.userId !== userId) {
+    res.status(404).send("<html><body>URL not found or you do not have permission to view this URL.</body></html>");
+  } else {
+  const templateVars = { id: shortUrl, longURL: urlDatabase[shortUrl].longURL };
   res.render("urls_show", templateVars);
+  }
 });
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
+
 });
 
 app.get("/hello", (req, res) => {
