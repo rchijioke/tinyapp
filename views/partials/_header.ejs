@@ -20,7 +20,7 @@
           <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
         </div>
         <div class="w-75 text-right d-flex justify-content-end">
-          <% if(user && user.email) { %>
+          <% if(user) { %>
             
           <form method="POST" action="/logout">
             logged in as <%= user.email %>
