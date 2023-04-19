@@ -4,7 +4,7 @@ const PORT = 8080; // default port 8080
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const cookieSession = require('cookie-session')
-
+const findUserByEmail = require('./helper/helpers')
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
@@ -45,15 +45,6 @@ const users = {
     email: "user2@example.com",
     password: "dishwasher-funk",
   },
-};
-
-const findUserByEmail = (email) => {
-  for (const userId in users) {
-    if (users[userId]["email"] === email) {
-      return users[userId];
-    }
-  }
-  return null;
 };
 
 const isLoggedIn = (userid) => {
@@ -198,7 +189,7 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   // for future reference
-  const user = findUserByEmail(email);
+  const user = findUserByEmail(email, users);
   if (!user) {
     res.status(403).send("User not Found");
   } else if (!bcrypt.compareSync(password, user.password)) {
@@ -228,7 +219,7 @@ app.post("/register", (req, res) => {
     return res.status(400).send("Email and password required.");
   }
 
-  if (findUserByEmail(email)) {
+  if (findUserByEmail(email, users)) {
     return res.status(400).send("Email is already in use.");
   }
   const hashedPassword = bcrypt.hashSync(password, 10)
@@ -254,4 +245,4 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-module.exports = router;
+module.exports = {router};
